@@ -23,7 +23,7 @@ replace cloud.google.com/go/spanner => ../../../spanner
 replace cloud.google.com/go/storage => ../../../storage
 
 require (
-	cloud.google.com/go v0.95.0
+	cloud.google.com/go v0.97.0
 	cloud.google.com/go/accessapproval v0.1.0
 	cloud.google.com/go/accesscontextmanager v0.0.0-00010101000000-000000000000
 	cloud.google.com/go/aiplatform v0.1.0
@@ -61,6 +61,7 @@ require (
 	cloud.google.com/go/errorreporting v0.1.0
 	cloud.google.com/go/essentialcontacts v0.1.0
 	cloud.google.com/go/eventarc v0.1.0
+	cloud.google.com/go/filestore v0.0.0-00010101000000-000000000000
 	cloud.google.com/go/firestore v0.90.0
 	cloud.google.com/go/functions v0.1.0
 	cloud.google.com/go/gaming v0.1.0
@@ -311,3 +312,5 @@ replace cloud.google.com/go/contactcenterinsights => ../../../contactcenterinsig
 replace cloud.google.com/go/networksecurity => ../../../networksecurity
 
 replace cloud.google.com/go/orchestration => ../../../orchestration
+
+replace cloud.google.com/go/filestore => ../../../filestore
