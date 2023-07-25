@@ -396,6 +396,11 @@ func (co *connection) lockingAppend(pw *pendingWrite) error {
 	}
 	if err != nil {
 		if shouldReconnect(err) {
+			metricCtx := co.ctx
+			if tagCtx, tagErr := tag.New(co.ctx, tag.Insert(keyError, grpcstatus.Code(err).String())); tagErr == nil {
+				metricCtx = tagCtx
+			}
+			recordStat(metricCtx, AppendRequestReconnects, 1)
 			// if we think this connection is unhealthy, force a reconnect on the next send.
 			co.reconnect = true
 		}
@@ -494,6 +499,15 @@ func connRecvProcessor(ctx context.Context, co *connection, arc storagepb.BigQue
 			resp, err := arc.Recv()
 			co.release(nextWrite)
 			if err != nil {
+				// The Recv() itself yielded an error.  We increment AppendResponseErrors by one, tagged by the status
+				// code.
+				status := grpcstatus.Convert(err)
+				metricCtx := ctx
+				if tagCtx, tagErr := tag.New(ctx, tag.Insert(keyError, codes.Code(status.Code()).String())); tagErr == nil {
+					metricCtx = tagCtx
+				}
+				recordStat(metricCtx, AppendResponseErrors, 1)
+
 				nextWrite.writer.processRetry(nextWrite, co, nil, err)
 				continue
 			}
@@ -501,11 +515,13 @@ func connRecvProcessor(ctx context.Context, co *connection, arc storagepb.BigQue
 			recordStat(ctx, AppendResponses, 1)
 
 			if status := resp.GetError(); status != nil {
-				// The response from the backend embedded a status error.  We record that the error
-				// occurred, and tag it based on the response code of the status.
+				// The response was received successfully, but the response embeds a status error in the payload.
+				// Increment AppendResponseErrors, tagged by status code.
+				metricCtx := ctx
 				if tagCtx, tagErr := tag.New(ctx, tag.Insert(keyError, codes.Code(status.GetCode()).String())); tagErr == nil {
-					recordStat(tagCtx, AppendResponseErrors, 1)
+					metricCtx = tagCtx
 				}
+				recordStat(metricCtx, AppendResponseErrors, 1)
 				respErr := grpcstatus.ErrorProto(status)
 
 				nextWrite.writer.processRetry(nextWrite, co, resp, respErr)

@@ -65,6 +65,10 @@ var (
 	// It is EXPERIMENTAL and subject to change or removal without notice.
 	AppendRequestRows = stats.Int64(statsPrefix+"append_rows", "Number of append rows sent", stats.UnitDimensionless)
 
+	// AppendRequestReconnects is a measure of the number of append rows sent.
+	// It is EXPERIMENTAL and subject to change or removal without notice.
+	AppendRequestReconnects = stats.Int64(statsPrefix+"append_reconnections", "Number of append rows reconnections", stats.UnitDimensionless)
+
 	// AppendResponses is a measure of the number of append responses received.
 	// It is EXPERIMENTAL and subject to change or removal without notice.
 	AppendResponses = stats.Int64(statsPrefix+"append_responses", "Number of append responses sent", stats.UnitDimensionless)
@@ -109,6 +113,10 @@ var (
 	// It is EXPERIMENTAL and subject to change or removal without notice.
 	AppendRequestRowsView *view.View
 
+	// AppendRequestReconnectsView is a cumulative sum of AppendRequestReconnects.
+	// It is EXPERIMENTAL and subject to change or removal without notice.
+	AppendRequestReconnectsView *view.View
+
 	// AppendResponsesView is a cumulative sum of AppendResponses.
 	// It is EXPERIMENTAL and subject to change or removal without notice.
 	AppendResponsesView *view.View
@@ -134,6 +142,7 @@ func init() {
 	AppendRequestBytesView = createSumView(stats.Measure(AppendRequestBytes), keyStream, keyDataOrigin)
 	AppendRequestErrorsView = createSumView(stats.Measure(AppendRequestErrors), keyStream, keyDataOrigin, keyError)
 	AppendRequestRowsView = createSumView(stats.Measure(AppendRequestRows), keyStream, keyDataOrigin)
+	AppendRequestReconnectsView = createSumView(stats.Measure(AppendRequestReconnects), keyStream, keyDataOrigin, keyError)
 
 	AppendResponsesView = createSumView(stats.Measure(AppendResponses), keyStream, keyDataOrigin)
 	AppendResponseErrorsView = createSumView(stats.Measure(AppendResponseErrors), keyStream, keyDataOrigin, keyError)
@@ -148,6 +157,7 @@ func init() {
 		AppendRequestBytesView,
 		AppendRequestErrorsView,
 		AppendRequestRowsView,
+		AppendRequestReconnectsView,
 
 		AppendResponsesView,
 		AppendResponseErrorsView,
