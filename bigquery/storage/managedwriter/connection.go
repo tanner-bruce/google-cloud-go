@@ -396,6 +396,11 @@ func (co *connection) lockingAppend(pw *pendingWrite) error {
 	}
 	if err != nil {
 		if shouldReconnect(err) {
+			metricCtx := co.ctx
+			if tagCtx, tagErr := tag.New(co.ctx, tag.Insert(keyError, grpcstatus.Code(err).String())); tagErr == nil {
+				metricCtx = tagCtx
+			}
+			recordStat(metricCtx, AppendRequestReconnects, 1)
 			// if we think this connection is unhealthy, force a reconnect on the next send.
 			co.reconnect = true
 		}
